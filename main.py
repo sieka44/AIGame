@@ -93,9 +93,7 @@ def calculate(player_position, mouse_position, r=0):
     dy = player_position[1] - mouse_position[1]
 
     reversed_sign_x = 1 if dx < 0 else -1
-
-    slope = dy / dx
-
+    slope = dy / dx if dx != 0 else 1
     x_new = reversed_sign_x * WINDOW_SIZE_X
     y_new = player_position[1] + slope * (x_new - player_position[0])
 
@@ -132,11 +130,10 @@ if __name__ == "__main__":
             elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
                 if new_bot_position is not None:
                     new_bot_velocity = Vector(event.pos) - new_bot_position
-                    bots.append(spawn_additional_bots(new_bot_position, new_bot_velocity, window))
+                    bots.append(spawn_additional_bots(new_bot_position, new_bot_velocity))
                     new_bot_position = None
-                elif event.type == pg.MOUSEMOTION:
-                    mouse_position = calculate(user.get_position(), event.pos)
 
+        mouse_position = calculate(user.get_position(), pg.mouse.get_pos())
         current_time = pg.time.get_ticks()
         dt = float(current_time - previous_time) / 1000.0
         previous_time = current_time
@@ -148,8 +145,7 @@ if __name__ == "__main__":
         for b in bots:
             b.draw(window)
             b.update(dt)
-        user.draw(window)
-        pg.draw.line(window, user.get_colour(), user.get_position(), mouse_position, 2)
+        user.draw_with_laser(window, mouse_position)
         pg.display.update()
         if VISIBLE_FPS and dt > 0.0:
             print(1.0 / dt)
