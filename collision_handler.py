@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class CollisionHandler:
 
     def __init__(self, bound_size):
@@ -60,9 +61,6 @@ class CircleCollisionHandler(CollisionHandler):
 
     def handle_stable_objects(self, bots, objects):
         for b in bots:
-            r = b.get_radius()
-            vel = b.get_velocity()
-            pos = b.get_position()
             for o in objects:
                 if CircleCollisionHandler._detect_pair_collision(b, o):
                     col_normal = b.get_position() - o.get_position()
@@ -70,10 +68,10 @@ class CircleCollisionHandler(CollisionHandler):
 
                     if np.dot(col_normal, b.get_velocity() - o.get_velocity()) >= 0.0:
                         continue
-                    J = self._restitution + 1.0
+                    J = b.get_mass() * o.get_mass() * (self._restitution + 1.0) / (b.get_mass() + o.get_mass())
                     J *= np.dot(b.get_velocity() - o.get_velocity(), col_normal)
 
-                    u1 = b.get_velocity() - J * col_normal
+                    u1 = b.get_velocity() - (J / b.get_mass()) * col_normal
 
                     b.set_velocity(u1)
 
