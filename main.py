@@ -13,17 +13,13 @@ from stable_object import StableObject
 BACKGROUND_COLOUR = (0, 0, 0)
 WINDOW_SIZE_X = 800
 WINDOW_SIZE_Y = 800
-DEFAULT_BOT_COUNT = 10
+DEFAULT_BOT_COUNT = 15
 DEFAULT_OBJECT_COUNT = 3
 DEFAULT_BALL_COLOUR = (45, 173, 60)
 DEFAULT_INERTIA = 1.
 DEFAULT_BOT_SIZE = 10
 DEFAULT_USER_SIZE = 25
 VISIBLE_FPS = False
-
-
-def rgb_ball_colour_setter(colour, mass):
-    return colour
 
 
 def spawn_bots(no_of_balls):
@@ -107,9 +103,7 @@ if __name__ == "__main__":
         window.fill(BACKGROUND_COLOUR)
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                # should_run = False
-                for b in bots:
-                    b.set_visible(True)
+                should_run = False
             elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 new_bot_position = Vector(event.pos)
             elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
@@ -127,8 +121,12 @@ if __name__ == "__main__":
         collision_handler.handle_collisions(bots)
         collision_handler.handle_stable_objects(bots, stable_objects)
 
+        if collision_handler.detect_any_collision(bots, user):
+            should_run = False
         for o in stable_objects:
+            o.handle_group_attack(bots, user.get_position())
             o.draw(window)
+            o.update(dt)
 
         for b in bots:
             b.draw(window)

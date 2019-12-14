@@ -25,7 +25,7 @@ class Bot(CollisionCircle):
         self.behavior = Behaviour.Explore
         self.asylums = asylums
         self.safe_areas = asylums.copy()
-        self.current_hide_position = None
+        self.direction = None
         self.is_visible = False
         self.hide_delta = x_position % 15 * TICK
         random.seed()
@@ -55,33 +55,38 @@ class Bot(CollisionCircle):
 
     def explore(self):
         random_angle = random.uniform(-180, 180)
+        self.hide_delta += self._delta
         self._velocity = self.rotate_vector_by_angle(random_angle)
-        if self.is_visible:
+        if self.hide_delta > HIDE_TIME:
             self.behavior = Behaviour.Hide
+            self.hide_delta = 0
 
     def hide(self):
         if self.hide_delta > HIDE_TIME:
             self.behavior = Behaviour.Risk
         else:
             self.hide_delta += self._delta
-        asylum_pos = self.get_nearest_asylum_position() if self.current_hide_position is None else self.current_hide_position
+        asylum_pos = self.get_nearest_asylum_position() if self.direction is None else self.direction
         n_asylum = self.convert_to_vel_vector(self._position - asylum_pos)
         self._velocity = np.array([CONST_VELOCITY, CONST_VELOCITY])
         self._velocity = self._velocity * n_asylum
 
     def risk(self):
-        self.current_hide_position = self.get_nearest_asylum_position()
+        self.direction = self.get_nearest_asylum_position()
         self.hide_delta = 0
         self.behavior = Behaviour.Hide
 
     def attack(self):
-        pass
+        player = self.convert_to_vel_vector(self._position - self.direction)
+        self._velocity = np.array([CONST_VELOCITY, CONST_VELOCITY])
+        self._velocity = self._velocity * player
 
     def get_nearest_asylum_position(self):
-        print("CALCULATING")
         min_dist = 1000000
         pos_out = None
         visited_asylum = None
+        if len(self.safe_areas) <= 0:
+            self.safe_areas = self.asylums.copy()
         for a in self.safe_areas:
             pos = a.get_asylum_point()
             tmp_dist = math.sqrt((pos[0] - self._position[0]) ** 2
@@ -91,13 +96,9 @@ class Bot(CollisionCircle):
                 pos_out = pos
                 visited_asylum = a
 
-        if pos_out is None:
-            self.safe_areas = self.asylums.copy()
-            return 0, 0
-        else:
-            self.safe_areas.remove(visited_asylum)
-            self.current_hide_position = pos_out
-            return pos_out
+        self.safe_areas.remove(visited_asylum)
+        self.direction = pos_out
+        return pos_out if pos_out is not None else (1, 1)
 
     def convert_to_vel_vector(self, vector):
         vector[0] = vector[0] / vector[0] * 1 if vector[0] > 0 else -1

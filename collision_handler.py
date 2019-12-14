@@ -76,6 +76,11 @@ class CircleCollisionHandler(CollisionHandler):
                     b.set_velocity(u1)
 
     @staticmethod
+    def is_in_area(a, sub_pos, sub_r):
+        return True if np.sqrt(np.sum((a.get_position() - sub_pos) ** 2)) <= (a.get_radius() + sub_r) \
+            else False
+
+    @staticmethod
     def detect_any_collision(objects, subject):
         for o in objects:
             if CircleCollisionHandler._detect_pair_collision(o, subject):
