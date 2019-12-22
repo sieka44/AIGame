@@ -101,6 +101,9 @@ if __name__ == "__main__":
 
     while should_run:
         window.fill(BACKGROUND_COLOUR)
+        mouse_position = pg.mouse.get_pos()
+        mouse_ray = calculate_ray(user.get_position(), mouse_position)
+        mouse_with_collision = collision_handler.handle_laser_with_stable_objects(user, mouse_position, stable_objects)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 should_run = False
@@ -111,8 +114,9 @@ if __name__ == "__main__":
                     new_bot_velocity = Vector(event.pos) - new_bot_position
                     bots.append(spawn_additional_bots(new_bot_position))
                     new_bot_position = None
+            elif pg.mouse.get_pressed()[2]:
+                collision_handler.handle_laser(user, mouse_with_collision, bots)
 
-        mouse_position = calculate_ray(user.get_position(), pg.mouse.get_pos())
         current_time = pg.time.get_ticks()
         dt = float(current_time - previous_time)
         previous_time = current_time
@@ -132,7 +136,8 @@ if __name__ == "__main__":
             b.draw(window)
             b.update(dt)
             b.adapt_to_state()
-        user.draw_with_laser(window, mouse_position)
+        user.update(dt)
+        user.draw_with_laser(window, mouse_with_collision)
         pg.display.update()
         if VISIBLE_FPS and dt > 0.0:
             print(1.0 / dt)

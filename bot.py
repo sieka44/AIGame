@@ -22,7 +22,7 @@ class Bot(CollisionCircle):
 
     def __init__(self, x_position, y_position, r, asylums):
         CollisionCircle.__init__(self, x_position, y_position, r, COLOUR, velocity=CONST_VELOCITY)
-        self.behavior = Behaviour.Explore
+        self.behavior = Behaviour.Hide
         self.asylums = asylums
         self.safe_areas = asylums.copy()
         self.direction = None

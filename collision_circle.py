@@ -47,5 +47,8 @@ class CollisionCircle:
     def get_mass(self):
         return self._mass
 
+    def get_delta(self):
+        return self._delta
+
     def set_delta(self, delta):
         self._delta = delta

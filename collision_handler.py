@@ -1,5 +1,7 @@
 import numpy as np
 
+LASER_TIME = 400
+
 
 class CollisionHandler:
 
@@ -74,6 +76,68 @@ class CircleCollisionHandler(CollisionHandler):
                     u1 = b.get_velocity() - (J / b.get_mass()) * col_normal
 
                     b.set_velocity(u1)
+
+    def handle_laser(self, player, mouse_pos, bots):
+        if player.get_delta() > LASER_TIME:
+            print("FIRE!")
+            player.set_delta(0)
+            player_pos = player.get_position()
+            vec = mouse_pos - player_pos
+            for bot in bots:
+                circle_center = bot.get_position()
+                r = bot.get_radius()
+                a = np.dot(vec, vec)
+                b = 2 * np.dot(vec, player_pos - circle_center)
+                c = np.dot(player_pos, player_pos) + np.dot(circle_center, circle_center) - 2 * np.dot(player_pos,
+                                                                                                       circle_center) - r ** 2
+                dist = b ** 2 - 4 * a * c
+                if dist < 0:
+                    continue
+                sqrt_dist = np.sqrt(dist)
+
+                t1 = (-b + sqrt_dist) / (2 * a)
+                t2 = (-b - sqrt_dist) / (2 * a)
+
+                if not (0 <= t1 <= 1 or 0 <= t2 <= 1):
+                    continue
+                bots.remove(bot)
+                return True
+        return False
+
+    def handle_laser_with_stable_objects(self, player, mouse_pos, objects):
+        player_pos = player.get_position()
+        vec = mouse_pos - player_pos
+        for obj in objects:
+            circle_center = obj.get_position()
+            r = obj.get_radius()
+            a = np.dot(vec, vec)
+            b = 2 * np.dot(vec, player_pos - circle_center)
+            c = np.dot(player_pos, player_pos) + np.dot(circle_center, circle_center) - 2 * np.dot(player_pos,
+                                                                                                   circle_center) - r ** 2
+            dist = b ** 2 - 4 * a * c
+            if dist < 0:
+                continue
+            sqrt_dist = np.sqrt(dist)
+
+            t1 = (-b + sqrt_dist) / (2 * a)
+            t2 = (-b - sqrt_dist) / (2 * a)
+
+            if not (0 <= t1 <= 1 or 0 <= t2 <= 1):
+                continue
+
+            t = max(0, min(1, - b / (2 * a)))
+            return player_pos + t * vec
+        return mouse_pos
+
+    def norm(self, vector):
+        le = vector[0] ** 2 + vector[1] ** 2
+        return vector * np.math.sqrt(le)
+
+    def perpendicular(self, vector):
+        new_vec = np.empty_like(vector)
+        new_vec[0] = -vector[1]
+        new_vec[1] = vector[0]
+        return new_vec
 
     @staticmethod
     def is_in_area(a, sub_pos, sub_r):

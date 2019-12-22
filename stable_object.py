@@ -44,9 +44,7 @@ class StableObject(CollisionCircle):
             self._delta = 0
 
     def check_group_size(self, unit, player_pos):
-        print(len(unit))
         if len(unit) > GROUP_SIZE:
-            print("ATTACK")
             for u in unit:
                 u.behavior = Behaviour.Attack
                 u.direction = player_pos
