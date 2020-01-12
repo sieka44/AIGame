@@ -125,8 +125,8 @@ if __name__ == "__main__":
         collision_handler.handle_collisions(bots)
         collision_handler.handle_stable_objects(bots, stable_objects)
 
-        if collision_handler.detect_any_collision(bots, user):
-            should_run = False
+        # if collision_handler.detect_any_collision(bots, user):
+        #     should_run = False
         for o in stable_objects:
             o.handle_group_attack(bots, user.get_position())
             o.draw(window)

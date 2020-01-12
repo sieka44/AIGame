@@ -54,7 +54,7 @@ class Bot(CollisionCircle):
             self._delta = 0
 
     def explore(self):
-        random_angle = random.uniform(-180, 180)
+        random_angle = random.uniform(-90, 90)
         self.hide_delta += self._delta
         self._velocity = self.rotate_vector_by_angle(random_angle)
         if self.hide_delta > HIDE_TIME:
@@ -72,9 +72,9 @@ class Bot(CollisionCircle):
         self._velocity = self._velocity * n_asylum
 
     def risk(self):
-        self.direction = self.get_nearest_asylum_position()
-        self.hide_delta = 0
-        self.behavior = Behaviour.Hide
+        self.direction = None
+        self.hide_delta = random.uniform(0, 8000)
+        self.behavior = Behaviour.Explore
 
     def attack(self):
         player = self.convert_to_vel_vector(self._position - self.direction)
@@ -84,7 +84,7 @@ class Bot(CollisionCircle):
     def get_nearest_asylum_position(self):
         min_dist = 1000000
         pos_out = None
-        visited_asylum = None
+        # visited_asylum = None
         if len(self.safe_areas) <= 0:
             self.safe_areas = self.asylums.copy()
         for a in self.safe_areas:
@@ -94,9 +94,9 @@ class Bot(CollisionCircle):
             if tmp_dist < min_dist:
                 min_dist = tmp_dist
                 pos_out = pos
-                visited_asylum = a
+                # visited_asylum = a
 
-        self.safe_areas.remove(visited_asylum)
+        # self.safe_areas.remove(visited_asylum)
         self.direction = pos_out
         return pos_out if pos_out is not None else (1, 1)
 
